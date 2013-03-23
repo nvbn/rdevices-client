@@ -1,8 +1,7 @@
-import json
-
-
 def method(result, **spec):
+    """Decorator for declaring method"""
     def decorator(fnc):
+        """Set spec to method"""
         fnc.spec = {
             'args': spec,
             'result': result,
@@ -13,6 +12,8 @@ def method(result, **spec):
 
 
 class DeviceMethod(object):
+    """Device method"""
+
     def __init__(self, fnc):
         self._fnc = fnc
         self.spec = fnc.spec
@@ -21,7 +22,10 @@ class DeviceMethod(object):
 
 
 class BaseDevice(type):
+    """Device metaclass"""
+
     def __new__(cls, name, bases, dct):
+        """Register device and methods"""
         device_cls = super(BaseDevice, cls).__new__(
             cls, name, bases, dct,
         )
@@ -33,6 +37,7 @@ class BaseDevice(type):
         return device_cls
 
     def _register_method(cls, fnc):
+        """Register method"""
         if not hasattr(cls, '_methods'):
             cls._methods = []
         cls._methods.append(
@@ -40,6 +45,7 @@ class BaseDevice(type):
         )
 
     def declarations(cls):
+        """Get methods declaration"""
         for method in cls._methods:
             yield {
                 'uuid': cls.Meta.uuid,
@@ -50,27 +56,32 @@ class BaseDevice(type):
 
 
 class Device(object):
+    """Device class"""
     __metaclass__ = BaseDevice
 
-    def __init__(self, sock):
-        self._sock = sock
+    def __init__(self, client):
+        self._client = client
 
     def process_request(self, request):
+        """Process request and send response"""
         try:
+            print request
             method = getattr(self, request['method'])
             result = method(**request['request'])
             self.send_response(result, request['request_id'])
-        except Exception:
+        except Exception as e:
             # fail silently
+            print e
             pass
 
     def send_response(self, result, request_id):
-        self._sock.write(json.dumps({
-            'request_id': request_id,
-            'action': 'response',
-            'response': result,
-            'uuid': self.Meta.uuid,
-        }))
+        """Send response"""
+        self._client.send(
+            request_id=request_id,
+            action='response',
+            response=result,
+            uuid=self.Meta.uuid,
+        )
 
     class Meta:
         abstract = True
