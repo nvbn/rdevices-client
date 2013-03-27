@@ -64,7 +64,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('device', help='file with device declaration')
     parser.add_argument(
-        '--server', '-s', default='localhost:8080',
+        '--server', '-s', default='conn.rdevic.es:9999',
         help='server host:port',
     )
     args = parser.parse_args(sys.argv[1:])
