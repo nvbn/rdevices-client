@@ -5,14 +5,16 @@ import imp
 import argparse
 import sys
 import os
+import time
 
 
 class RDClient(object):
     """rdevic.es client"""
 
     def __init__(self, host_port, path):
+        self._host_port = host_port
         self._load(path)
-        self._connect(host_port)
+        self._connect()
         self._declare_methods()
         self._create_device()
 
@@ -20,13 +22,26 @@ class RDClient(object):
         """Import module with device"""
         imp.load_source('device_module', path)
 
-    def _connect(self, host_port):
+    def _connect(self):
         """Connect to remote server"""
         self._sock = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM,
         )
-        host, port = host_port.split(':')
+        host, port = self._host_port.split(':')
         self._sock.connect((host, int(port)))
+        self._sock.settimeout(60 * 60)
+
+    def _reconnect(self):
+        """Reconnect"""
+        while True:
+            try:
+                self._sock.close()
+                self._connect()
+                self._declare_methods()
+                break
+            except socket.error:
+                print 'Failed to connect'
+                time.sleep(1)
 
     def _declare_methods(self):
         """Declare device methods"""
@@ -50,14 +65,22 @@ class RDClient(object):
         """Run client"""
         msg = ''
         while True:
-            char = self._sock.recv(1)
-            if char == '\n':
-                self._device.process_request(
-                    json.loads(msg),
-                )
-                msg = ''
-            else:
-                msg += char
+            reconnect = False
+            try:
+                char = self._sock.recv(1)
+                if char == '\n':
+                    self._device.process_request(
+                        json.loads(msg),
+                    )
+                    msg = ''
+                else:
+                    msg += char
+                if not char:
+                    reconnect = True
+            except socket.timeout:
+                reconnect = True
+            if reconnect:
+                self._reconnect()
 
 
 def main():
