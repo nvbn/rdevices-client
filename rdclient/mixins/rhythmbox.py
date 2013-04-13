@@ -54,3 +54,8 @@ class RhythmboxMixin(object):
         """Get current song with format"""
         proc = self._call_rhythmbox('--print-playing-format', format)
         return proc.stdout.readline()
+
+    @method('None', uri='str')
+    def rhythmbox_play_uri(self, uri):
+        """Play uri in rhythmbox"""
+        self._call_rhythmbox('--play-uri={}'.format(uri))
