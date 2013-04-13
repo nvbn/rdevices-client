@@ -86,5 +86,10 @@ class Device(object):
             uuid=self.Meta.uuid,
         )
 
+    @method('bool')
+    def is_online(self):
+        """Always return True"""
+        return True
+
     class Meta:
         abstract = True

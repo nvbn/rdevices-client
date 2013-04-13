@@ -29,7 +29,7 @@ class RDClient(object):
         )
         host, port = self._host_port.split(':')
         self._sock.connect((host, int(port)))
-        self._sock.settimeout(60 * 60)
+        self._sock.settimeout(60)
 
     def _reconnect(self):
         """Reconnect"""
