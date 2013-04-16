@@ -8,7 +8,7 @@ Installation
 
 Just run::
 
-    pip install "git+https://github.com/nvbn/rdevices-client.git#egg=rdclient"
+    pip install -e git://github.com/nvbn/rdevices-client.git#egg=rdclient
 
 
 Usage
