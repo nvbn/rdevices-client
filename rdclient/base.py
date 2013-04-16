@@ -29,7 +29,10 @@ class BaseDevice(type):
         device_cls = super(BaseDevice, cls).__new__(
             cls, name, bases, dct,
         )
-        for key, value in device_cls.__dict__.items():
+        items = []
+        for cls in device_cls.__mro__:
+            items += cls.__dict__.items()
+        for key, value in items:
             if getattr(value, '_is_device_method', False):
                 device_cls._register_method(value)
         if not getattr(device_cls.Meta, 'abstract', False):
@@ -82,6 +85,11 @@ class Device(object):
             response=result,
             uuid=self.Meta.uuid,
         )
+
+    @method('bool')
+    def is_online(self):
+        """Always return True"""
+        return True
 
     class Meta:
         abstract = True

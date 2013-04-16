@@ -18,5 +18,5 @@ class Rhythmbox(Device):
         return commands.getoutput('rhythmbox-client --print-playing')
 
     class Meta:
-        uuid = 'c841b6bc-9400-11e2-bb09-5404a6499c84'
+        uuid = '9270a51c-9477-11e2-88e0-5404a6499c84'
 
