@@ -11,19 +11,19 @@ import time
 class RDClient(object):
     """rdevic.es client"""
 
-    def __init__(self, host_port, path):
+    def __init__(self, host_port, path, verbose=False):
+        self._verbose = verbose
         self._host_port = host_port
         self._load(path)
         self._connect()
-        self._declare_methods()
         self._create_device()
 
     def _load(self, path):
         """Import module with device"""
         imp.load_source('device_module', path)
 
-    def _connect(self):
-        """Connect to remote server"""
+    def _create_connection(self):
+        """Create connection to remote"""
         self._sock = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM,
         )
@@ -31,17 +31,21 @@ class RDClient(object):
         self._sock.connect((host, int(port)))
         self._sock.settimeout(60)
 
-    def _reconnect(self):
-        """Reconnect"""
+    def _connect(self):
+        """Connect to remote server"""
         while True:
             try:
-                self._sock.close()
-                self._connect()
+                self._create_connection()
                 self._declare_methods()
                 break
             except socket.error:
                 print 'Failed to connect'
                 time.sleep(1)
+
+    def _reconnect(self):
+        """Reconnect"""
+        self._sock.close()
+        self._connect()
 
     def _declare_methods(self):
         """Declare device methods"""
@@ -90,10 +94,14 @@ def main():
         '--server', '-s', default='conn.rdevic.es:9999',
         help='server host:port',
     )
+    parser.add_argument(
+        '--verbose', '-V', action='store_true',
+    )
     args = parser.parse_args(sys.argv[1:])
     client = RDClient(
         args.server,
         os.path.abspath(args.device),
+        args.verbose,
     )
     client.run()
 
