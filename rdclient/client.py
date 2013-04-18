@@ -11,7 +11,8 @@ import time
 class RDClient(object):
     """rdevic.es client"""
 
-    def __init__(self, host_port, path):
+    def __init__(self, host_port, path, verbose=False):
+        self._verbose = verbose
         self._host_port = host_port
         self._load(path)
         self._connect()
@@ -93,10 +94,14 @@ def main():
         '--server', '-s', default='conn.rdevic.es:9999',
         help='server host:port',
     )
+    parser.add_argument(
+        '--verbose', '-V', action='store_true',
+    )
     args = parser.parse_args(sys.argv[1:])
     client = RDClient(
         args.server,
         os.path.abspath(args.device),
+        args.verbose,
     )
     client.run()
 

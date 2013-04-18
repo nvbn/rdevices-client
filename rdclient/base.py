@@ -68,7 +68,8 @@ class Device(object):
     def process_request(self, request):
         """Process request and send response"""
         try:
-            print request
+            if self._client._verbose:
+                print request
             method = getattr(self, request['method'])
             result = method(**request['request'])
             self.send_response(result, request['request_id'])
